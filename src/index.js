@@ -1,7 +1,12 @@
-import { saludar } from './js/componentes.js';
+
+import { Todo } from './class/todo.class';
+import { TodoList } from './class/todo_list.class';
+import { crearTodoListHtml } from './js/componentes';
 import './styles.css';
 
+/* const tarea = new Todo('Aprender React'); */
 
-const nombre = 'Fernando';
-
-saludar( nombre );
+const newTodoList = new TodoList();
+/* newTodoList.crearTarea(tarea)
+crearTodoListHtml(tarea) */
+console.log(newTodoList)
