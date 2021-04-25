@@ -28,10 +28,12 @@ export const crearTodoListHtml = (todo) => {
     div.innerHTML = htmlBody;
 
     ulTodoList.append(div.firstElementChild);
+
+    countTodo();
+    
 }
 
-//eventos
-
+//eventos input new todo
 newTodoInput.addEventListener('keyup', (event) =>{
 
     //capturar teclas pulsadas y generar todo al presionar enter
@@ -46,6 +48,8 @@ newTodoInput.addEventListener('keyup', (event) =>{
     
 })
 
+
+//Eventos todoList
 ulTodoList.addEventListener('click', (event)=> {
     const targetClassElement = event.target.className;
     const idTodo = event.target.parentNode.parentNode.dataset.id;
@@ -55,33 +59,50 @@ ulTodoList.addEventListener('click', (event)=> {
         event.target.parentNode.parentNode.classList.toggle('completed')
         todoList.tareaCompletada(idTodo);
         
+        countTodo();
     }
     
     //Eliminar tarea
     if(targetClassElement.includes('destroy')){
-        event.target.parentNode.remove(event.target.parentNode)
+        event.target.parentNode.parentNode.remove(event.target.parentNode);
         
-        todoList.eliminarTarea(idTodo)
-        
+        todoList.eliminarTarea(idTodo);
+        countTodo();
     }
 
     console.log(todoList)
 
 })
 
+
+//Eventos footer
 footer.addEventListener('click', (event)=> {
     const targetClassElement = event.target.className;
 
-    //eliminar tareas completadas
+    //eliminar todas las tareas completadas
     if(targetClassElement.includes('clear-completed')){
         const nodeListTodo = [...ulTodoList.children];
 
         
-        nodeListTodo.map(e => console.log(e))
+        nodeListTodo.map(e => {
+            (e.className === 'completed') && e.remove(e); 
+            (e.className === 'completed') && todoList.eliminarTarea(e.dataset.id);
+        })
     }
 
     console.log(targetClassElement)
 })
 
 
+//function helpers
 
+function countTodo() {
+    /*------------------------------------------*/
+    /*--Count Todo--*/
+    /*------------------------------------------*/
+    const nodeListTodo = [...ulTodoList.children];
+
+    const filterListCompletedTodo = nodeListTodo.filter( e => e.className != 'completed' )
+
+    todoCount.firstChild.innerText = filterListCompletedTodo.length
+}
