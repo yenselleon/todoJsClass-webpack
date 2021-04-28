@@ -7,8 +7,8 @@ const newTodoInput = document.querySelector('.new-todo');
 const todoList = new TodoList()
 const footer = document.querySelector('.footer');
 const todoCount = document.querySelector('.todo-count');
-
-
+const footerFilters = document.querySelectorAll('.filtro');
+const arrowLabelInput = document.querySelector('.arrow');
 
 
 export const crearTodoListHtml = (todo) => {
@@ -30,8 +30,9 @@ export const crearTodoListHtml = (todo) => {
     ulTodoList.append(div.firstElementChild);
 
     countTodo();
-    
+    counChildUlNodeElement()
 }
+
 
 //eventos input new todo
 newTodoInput.addEventListener('keyup', (event) =>{
@@ -59,7 +60,10 @@ ulTodoList.addEventListener('click', (event)=> {
         event.target.parentNode.parentNode.classList.toggle('completed')
         todoList.tareaCompletada(idTodo);
         
+        
+        updatedStateOfTodoList()
         countTodo();
+        
     }
     
     //Eliminar tarea
@@ -67,10 +71,11 @@ ulTodoList.addEventListener('click', (event)=> {
         event.target.parentNode.parentNode.remove(event.target.parentNode);
         
         todoList.eliminarTarea(idTodo);
+        counChildUlNodeElement();
         countTodo();
+
     }
 
-    console.log(todoList)
 
 })
 
@@ -88,21 +93,122 @@ footer.addEventListener('click', (event)=> {
             (e.className === 'completed') && e.remove(e); 
             (e.className === 'completed') && todoList.eliminarTarea(e.dataset.id);
         })
+
+        counChildUlNodeElement()
+
     }
 
-    console.log(targetClassElement)
+    //filtrar todoList mediante btn de 
+    if(targetClassElement.includes('filtro')){
+        const nodeListTodo = [...ulTodoList.children];
+
+        clearClassAndAddSelected(event.target.innerText)
+        
+        updatedStateOfTodoList()
+
+        
+
+    }
+
+})
+
+//eventos flecha input toggle-all para seleccionar todos los todos
+arrowLabelInput.addEventListener('click', ()=> {
+    const arraLiTodoList = [...ulTodoList.children];
+    let isEveryPending = arraLiTodoList.every( e => e.className.includes('completed') === false);
+    let isEveryCompleted = arraLiTodoList.every( e => e.className.includes('completed') === true);
+
+    arraLiTodoList.map(e => {
+        
+        todoList.tareaCompletada(e.dataset.id);
+
+        if (isEveryCompleted) {
+            e.classList.toggle('completed');   
+            e.children[0].childNodes[1].checked=0;
+        }
+        else if (isEveryPending ) {
+            e.classList.toggle('completed')
+            e.children[0].childNodes[1].checked=1;
+        }
+        else if (!isEveryPending && !isEveryCompleted ) {
+            (!e.className.includes('completed')) && e.classList.toggle('completed');
+            e.children[0].childNodes[1].checked=1;
+        };
+    })
+    
+    updatedStateOfTodoList();
+    countTodo();
 })
 
 
-//function helpers
 
+
+/*------------------------------------------*/
+/*--Funtion Helpers--*/
+/*------------------------------------------*/
+
+//helper Contar pendientes y completados
 function countTodo() {
     /*------------------------------------------*/
     /*--Count Todo--*/
     /*------------------------------------------*/
     const nodeListTodo = [...ulTodoList.children];
+    const filterPendingTodo = nodeListTodo.filter( e => (!e.className.includes('completed')) && e );
+    const filterListCompletedTodo = nodeListTodo.filter( e => (e.className.includes('completed')) && e );
+    const clearAllCompletedBtn = document.querySelector('.clear-completed');
+    
 
-    const filterListCompletedTodo = nodeListTodo.filter( e => e.className != 'completed' )
+    todoCount.firstChild.innerText = filterPendingTodo.length;
+    
+    (filterListCompletedTodo.length >= 1)
+                                        ? clearAllCompletedBtn.classList.remove('hidden')
+                                        : clearAllCompletedBtn.classList.add('hidden')
+}
 
-    todoCount.firstChild.innerText = filterListCompletedTodo.length
+
+
+//Helper Btn: limpia la clase de los btn que tengan la clase selected y añade la clase al boton pulsado
+function clearClassAndAddSelected(innerTextBtnSelected) {
+    const arrFooterFilters = Array.from(footerFilters)
+
+    arrFooterFilters.map(e => {
+        e.classList.remove('selected');
+        (e.innerText === innerTextBtnSelected) && e.classList.add('selected');
+    });
+}
+
+
+//Helper actualizar el estado completado o no completado del todo para que sean filtrados por los btn del footer
+function updatedStateOfTodoList(){
+    const nodelistado = [...ulTodoList.children]
+    const btnFiltrosFooter = [...footerFilters]
+
+    nodelistado.forEach(e => (e.className.includes('hidden') && e.classList.remove('hidden')))
+
+    const btnfilter = btnFiltrosFooter.filter( e => {
+        return (e.className.includes('selected')) && e
+    })
+    
+    
+    nodelistado.map( e => {
+        (btnfilter[0].innerText === 'Completados') && ((!e.className.includes('completed')) && e.classList.add('hidden'));
+        (btnfilter[0].innerText === 'Pendientes') && ((e.className.includes('completed')) && e.classList.add('hidden'));
+    })
+    
+}
+
+// helper 
+
+function counChildUlNodeElement() {
+    let count =  ulTodoList.childElementCount;
+
+    if(count >= 1){
+
+        arrowLabelInput.classList.remove('hidden')
+        footer.classList.remove('hidden')
+    }else{
+        arrowLabelInput.classList.add('hidden')
+        footer.classList.add('hidden')
+    }
+
 }

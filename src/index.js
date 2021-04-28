@@ -9,4 +9,3 @@ import './styles.css';
 const newTodoList = new TodoList();
 /* newTodoList.crearTarea(tarea)
 crearTodoListHtml(tarea) */
-console.log(newTodoList)
